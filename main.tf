@@ -16,7 +16,6 @@ module "vpc" {
   public_subnets       = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
   enable_nat_gateway   = true
   single_nat_gateway   = true
-  enable_dns_hostnames = true
 
   tags = {
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
@@ -52,7 +51,6 @@ resource "aws_security_group" "security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
 
 # Cluster
 module "eks" {
