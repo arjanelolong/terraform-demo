@@ -67,7 +67,7 @@ module "eks" {
       instance_type                 = "t2.micro"
       additional_userdata           = "sachi development"
       asg_desired_capacity          = 2
-      additional_security_group_ids = [aws_security_group.sg_sachi_development.id]
+      additional_security_group_ids = [aws_security_group.security_group.id]
     },
   ]
 }
