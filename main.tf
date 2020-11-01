@@ -41,7 +41,7 @@ resource "aws_security_group" "security_group" {
   vpc_id      = module.vpc.vpc_id
 
   ingress {
-    protocol    = "http"
+    protocol    = "tcp"
     from_port   = 80
     to_port     = 80
     cidr_blocks = ["0.0.0.0/0"]
