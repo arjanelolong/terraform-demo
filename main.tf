@@ -69,7 +69,9 @@ module "eks" {
       name                          = "worker-group-${var.environment}"
       instance_type                 = "t2.micro"
       additional_userdata           = "sachi development"
+      asg_min_size                  = 1
       asg_desired_capacity          = 2
+      asg_max_size                  = 3
       additional_security_group_ids = [aws_security_group.security_group.id]
       public_ip = true
     },
