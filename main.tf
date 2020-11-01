@@ -73,7 +73,7 @@ module "eks" {
       asg_desired_capacity          = var.desired_size
       asg_max_size                  = var.max_size
       additional_security_group_ids = [aws_security_group.security_group.id]
-      public_ip = true
+      platform                      = "linux"
     },
   ]
 }
