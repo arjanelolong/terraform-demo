@@ -1,5 +1,10 @@
 locals {
-  cluster_name = var.cluster_name
+  cluster_name = "${var.cluster_name}-${random_string.suffix.result}"
+}
+
+resource "random_string" "suffix" {
+  length  = 8
+  special = false
 }
 
 # Virtual Private Cloud
@@ -9,9 +14,9 @@ module "vpc" {
 
   name                 = var.vpc_name
   cidr                 = "10.0.0.0/16"
-  azs                  = ["ap-southeast-1a"]
-  private_subnets      = ["10.0.1.0/24"]
-  public_subnets       = ["10.0.2.0/24"]
+  azs                  = ["ap-southeast-1a","ap-southeast-1b" ]
+  private_subnets      = ["10.0.1.0/24","10.0.2.0/24"]
+  public_subnets       = ["10.0.3.0/24","10.0.4.0/24"]
   enable_nat_gateway   = true
   single_nat_gateway   = true
 
@@ -36,7 +41,7 @@ resource "aws_security_group" "security_group" {
   vpc_id      = module.vpc.vpc_id
 
   ingress {
-    protocol    = "tcp"
+    protocol    = "http"
     from_port   = 80
     to_port     = 80
     cidr_blocks = ["0.0.0.0/0"]
@@ -55,7 +60,7 @@ module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   cluster_name    = var.cluster_name
   cluster_version = "1.17"
-  subnets         = [module.vpc.private_subnets, module.vpc.public_subnets]
+  subnets         = module.vpc.private_subnets
 
   vpc_id = module.vpc.vpc_id
 
