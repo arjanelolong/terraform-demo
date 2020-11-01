@@ -66,6 +66,7 @@ module "eks" {
       additional_userdata           = "sachi development"
       asg_desired_capacity          = 2
       additional_security_group_ids = [aws_security_group.security_group.id]
+      public_ip = true
     },
   ]
 }
