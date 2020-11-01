@@ -9,7 +9,7 @@ module "vpc" {
 
   name                 = var.vpc_name
   cidr                 = "10.0.0.0/16"
-  azs                  = "ap-southeast-1a"
+  azs                  = ["ap-southeast-1a"]
   private_subnets      = ["10.0.1.0/24"]
   public_subnets       = ["10.0.2.0/24"]
   enable_nat_gateway   = true
@@ -55,7 +55,7 @@ module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   cluster_name    = var.cluster_name
   cluster_version = "1.17"
-  subnets         = module.vpc.private_subnets
+  subnets         = [module.vpc.private_subnets, module.vpc.public_subnets]
 
   vpc_id = module.vpc.vpc_id
 
