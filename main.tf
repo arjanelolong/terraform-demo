@@ -56,6 +56,22 @@ resource "aws_security_group" "security_group" {
 }
 
 # Cluster
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"]
+}
+
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   cluster_name    = var.cluster_name
@@ -66,6 +82,7 @@ module "eks" {
 
   worker_groups = [
     {
+      ami_id                        = data.aws_ami.ubuntu.id
       name                          = "worker-group-${var.environment}"
       instance_type                 = "t2.micro"
       additional_userdata           = "sachi development"
