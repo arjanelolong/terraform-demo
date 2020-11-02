@@ -1,12 +1,3 @@
-locals {
-  cluster_name = "${var.cluster_name}-${random_string.suffix.result}"
-}
-
-resource "random_string" "suffix" {
-  length  = 3
-  special = false
-}
-
 # Virtual Private Cloud
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -15,22 +6,23 @@ module "vpc" {
   name                 = var.vpc_name
   cidr                 = "10.0.0.0/16"
   azs                  = ["ap-southeast-1a","ap-southeast-1b" ]
-  private_subnets      = ["10.0.1.0/24","10.0.2.0/24"]
+  private_subnets      = ["10.0.1.0/24","10.0.2.0/24"] 
   public_subnets       = ["10.0.3.0/24","10.0.4.0/24"]
   enable_nat_gateway   = true
   single_nat_gateway   = true
+  enable_dns_hostnames = true
 
   tags = {
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
   }
 
   public_subnet_tags = {
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
     "kubernetes.io/role/elb"                      = "1"
   }
 
   private_subnet_tags = {
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"             = "1"
   }
 }
@@ -56,25 +48,9 @@ resource "aws_security_group" "security_group" {
 }
 
 # Cluster
-data "aws_ami" "ubuntu" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"]
-}
-
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
-  cluster_name    = local.cluster_name
+  cluster_name    = var.cluster_name
   cluster_version = "1.17"
   subnets         = module.vpc.private_subnets
 
@@ -82,7 +58,6 @@ module "eks" {
 
   worker_groups = [
     {
-      ami_id                        = data.aws_ami.ubuntu.id
       name                          = "worker-group-${var.environment}"
       instance_type                 = "t2.micro"
       additional_userdata           = "sachi development"
@@ -90,7 +65,6 @@ module "eks" {
       asg_desired_capacity          = var.desired_size
       asg_max_size                  = var.max_size
       additional_security_group_ids = [aws_security_group.security_group.id]
-      platform                      = "linux"
     },
   ]
 }
